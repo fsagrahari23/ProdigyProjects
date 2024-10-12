@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather app</title>
+    <style>
+        html,body{
+            height:100%;
+            width:100%;
+        }
+       #container{
+        max-width:60vh;
+        
+        top:50%;
+        left:50%;
+        position:absolute;
+        transform:translate(-50%,-50%);
+        border:2px solid white;
+        padding: 20px;
+        margin-top: 10px;
+        box-shadow: 0 0 10px ;
+        text-align: center;
+
+       }
+       h1{
+        font-weight: 500;
+       }
+       form{
+        display: flex;
+        justify-content: center;
+        
+        flex-wrap: wrap;
+       }
+       form input[type="text"]{
+        font-size: 14px;
+        padding: 8px;
+        border: none;
+        outline: none;
+        width: 60%;
+       }
+       button{
+        background-color: rgb(20, 20, 240);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+        border: none;
+        transition: .3s ease;
+       }
+       button:hover{
+        background-color: rgb(86, 115, 219);
+       }
+       .icon img{
+        width:100px;
+        height: 100px;
+        background-size: contain ;
+        background-repeat: no-repeat;
+        background-position: center center;
+        display: none;
+        
+       }
+       
+
+
+       .temp{
+        font-size: 48px;
+        font-weight: bold;
+        
+       }
+       .description{
+        margin-bottom: 10px;
+        margin-top: 10px;
+        font-size: 40px;
+        font-weight: bold;
+        display:none;
+
+       }
+       .details{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        
+       }
+
+       
+       .details > div{
+          padding: 5px;
+          background-color: bisque;
+          margin: 10px;
+          flex: 1;
+          border-radius: 10px;
+          flex-wrap: wrap;
+          text-align: center;
+          min-height: 45px;
+       }
+       #feel{
+        display: none;
+       }
+       #humid{
+        display: none;
+       }
+       #speed{
+        display: none;
+       }
+       @media (max-width:768px){
+        form{
+            flex-direction: column;
+        }
+        form input[type="text"]{
+            width:100%;
+            margin-bottom: 10px;
+        }
+        .temp{
+        
+            font-size: 16px;
+        }
+        .description{
+            font-weight: 500;
+            font-size: 15px;
+        }
+        .details > div{
+            margin:2px;
+        }
+        button{
+            font-size: 14px;
+            
+        }
+
+
+       }
+
+    </style>
+</head>
+<body>
+    
+    <div id="container">
+      
+        <h1>Weather App</h1>
+      
+        <div>
+        <form>
+            
+            <input type="text" id="city" name="weather" placeholder="city name">
+            <button type="submit">Enter</button>
+        </form>
+        </div>
+        <div id="data">
+            <div class="icon">
+                <img src="http://openweathermap.org/img/wn/01d.png"  alt="Weather">
+            </div>
+            <div class="temp">
+             <span id="temperature"></span>
+
+            </div>
+            <div class="description">Sunny</div>
+            <div class="details">
+                <div id="feel">Feels Like:</div>
+                <div id="humid">Humidity:</div>
+                <div id="speed">Wind Speed:</div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+        const apiKey="e2d5567843664019f9d1820c58e1d7a4";
+       const data= document.querySelector("#data");
+       const cityEl=document.querySelector("#city");
+       const formEl=document.querySelector("form");
+
+       formEl.addEventListener("submit",(event)=>{
+        event.preventDefault();
+        const cityValue=cityEl.value;
+        console.log(cityValue);
+        GetWeather(cityValue);
+
+       })
+
+       
+              async function GetWeather(cityValue){
+                try{
+                    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityValue} &appid=${apiKey}`);
+
+                    if(!response.ok){
+                        throw new Error ("Network Error");
+                    }
+
+                    const data= await response.json();
+
+                    console.log(data);
+                    showData(data);
+                }catch(error){
+                      console.log(error);
+                }
+
+
+              }
+
+        
+                     function showData(data){
+                        let {main:{temp, humidity,feels_like}, wind:{speed}, weather}=data;
+                        let desc=[weather[0].description];
+                        let kelvin=(temp - 273.15).toFixed(
+                            1)+'°C';  
+                            let feels=(feels_like - 273.15).toFixed(
+                                1);
+                            //converting from Kelvin to Celsius
+                            //create elements for displaying the data
+                            let cityEl=document.createElement('h2');
+                            let tempEl=document.querySelector("#temperature");
+                            let humidityEl=document.querySelector('#humid');
+                            let windEl=document.querySelector('#speed');
+                            let imgEl=document.querySelector(".icon");
+                            let descr = document.querySelector(".description");
+                            let feel=document.querySelector("#feel");
+                            //add text and values to the created elements
+                            cityEl.textContent=`City: ${data.name}`;
+                            
+                            tempEl.innerHTML=`Temperature: ${kelvin}`;
+                            tempEl.style.display=" ";  
+                            descr.textContent=`${desc}`;
+                            descr.style.display="contents";
+                            feel.style.display="contents";
+                            humidityEl.style.display="contents";
+                            windEl.style.display="contents";
+                            imgEl.style.display="contents";
+                            feel.textContent=`Feels Like:${feels}°C`;                  
+                            humidityEl.textContent=`Humidity: ${humidity}%`;
+                            windEl.textContent=`Wind Speed :${speed}m/s`;
+                            feel.style.display="contents";
+                            humidityEl.style.display="contents";
+                            windEl.style.display="contents";
+                            imgEl.style.display="contents";
+                    }
+
+
+                    
+       
+    </script>
+</body>
+</html>
